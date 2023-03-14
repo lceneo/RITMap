@@ -1,0 +1,17 @@
+
+  <h1 class="title">Карта</h1>
+  <div id="ol-map"></div>
+  <div class="buttons">
+    <button>Сохранить</button>
+    <button (click)="clearAllMarks()">Очистить</button>
+    <button>Показать</button>
+  </div>
+  <section>
+    Список сохранённых точек:
+  </section>
+  <mat-list>
+    <mat-list-item *ngFor="let p of map.getPoints()">
+      <span matListItemTitle>{{p.adress}}</span>
+      <span matListItemLine>Долгота: {{p.longitude}} Широта: {{p.latitude}}</span>
+    </mat-list-item>
+  </mat-list>
