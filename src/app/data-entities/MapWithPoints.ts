@@ -9,14 +9,10 @@ export class MapWithPoints extends Map{
   }
 
   public addPoint(point: CustomPoint, adressObservable?: Observable<string>): void{
+    this.points.push(point);
     if(adressObservable !== undefined) {
-      adressObservable.subscribe(v => {
-        point.adress = v;
-        this.points.push(point)
-      });
+      adressObservable.subscribe(v => point.adress = v);
     }
-    else
-      this.points.push(point);
   }
 
   public getPoints(): CustomPoint[]{

@@ -4,7 +4,7 @@ import {Point} from 'ol/geom.js';
 import View from 'ol/View.js';
 import TileLayer from 'ol/layer/Tile.js';
 import OSM from 'ol/source/OSM.js';
-import {fromEvent} from "rxjs";
+import {debounce, fromEvent} from "rxjs";
 import {Feature, MapBrowserEvent} from "ol";
 import {fromLonLat, toLonLat} from "ol/proj";
 import LayerVector from 'ol/layer/Vector';
