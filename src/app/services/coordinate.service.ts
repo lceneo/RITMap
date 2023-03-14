@@ -12,7 +12,7 @@ export class CoordinateService {
 
   constructor(private httpClient: HttpClient) { }
 
-  public getAdress(lon: number, lat: number): Observable<any>{
+  public getAdress(lon: number, lat: number): Observable<string>{
     return this.httpClient.get<IRequest>(
       `https://api.opencagedata.com/geocode/v1/json?key=${this.APIKEY}&q=${lat}+${lon}&pretty=1&address_only=1&language=ru`)
       .pipe(
