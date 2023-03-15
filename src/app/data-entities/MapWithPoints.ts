@@ -12,6 +12,7 @@ import Icon from "ol/style/Icon";
 export class MapWithPoints extends Map {
   private points: CustomPoint[] = [];
   private markersLayer!: LayerVector<SourceVector<any>>;
+  private lastAddedFeature!: Feature<Point>;
 
   constructor(options: MapOptions | undefined) {
     super(options);
@@ -29,15 +30,24 @@ export class MapWithPoints extends Map {
     const newMarker = new Feature({
       geometry: new Point(fromLonLat([point.longitude, point.latitude])),
     });
+    this.lastAddedFeature = newMarker;
     newMarker.setStyle(new Style({
       image: new Icon({
-        src: "../../assets/img/map-marker.svg", scale: 0.03})
+        src: point.isSaved? "../../assets/img/saved-marker.svg" : "../../assets/img/unsaved-marker.svg", scale: 0.03})
     }));
     this.markersLayer.getSource()!.addFeature(newMarker);
     this.points.push(point);
     if (adressObservable !== undefined) {
       adressObservable.subscribe(v => point.adress = v);
     }
+  }
+
+  public saveLastPoint(): void{
+    this.points[this.points.length - 1].isSaved = true;
+    this.lastAddedFeature.setStyle(new Style({
+      image: new Icon({
+        src: "../../assets/img/saved-marker.svg", scale: 0.03})
+    }));
   }
 
   public getPoints(): CustomPoint[] {
@@ -51,14 +61,24 @@ export class MapWithPoints extends Map {
     this.points = [];
   }
 
-  public connectPoints(pointsNumber: number = this.points.length): void{
+  public removeLastPointAndMarker(): void{
+    this.points.pop();
+    this.markersLayer.getSource()?.removeFeature(this.lastAddedFeature);
+  }
+
+  public connectPoints(pointsNumber: number = this.points.length): number{
+    let isSuccessful = false;
     for (let i = 0; i < pointsNumber - 1; i++) {
+      if(!this.points[i].isSaved || !this.points[i + 1].isSaved)
+        return i + 1;
       const fPointLocation = fromLonLat([this.points[i].longitude, this.points[i].latitude]);
       const sPointLocation = fromLonLat([this.points[i+1].longitude, this.points[i+1].latitude]);
       const feature = new Feature({
         geometry: new LineString([fPointLocation, sPointLocation])
       });
       this.markersLayer.getSource()!.addFeature(feature);
+      isSuccessful = true;
     }
+    return isSuccessful ? this.points.length : 0;
   }
 }

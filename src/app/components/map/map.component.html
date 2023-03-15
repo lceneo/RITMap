@@ -3,7 +3,7 @@
     <section class = mapInfo>
       <div id="ol-map"></div>
       <div class="buttons">
-        <button class="mapBtn" mat-flat-button color="primary">Сохранить</button>
+        <button class="mapBtn" mat-flat-button color="primary" (click) = "saveNewPoint()">Сохранить</button>
         <button class="mapBtn" mat-flat-button color="primary" (click)="clearAllMarksAndTracks()">Очистить</button>
         <button class="mapBtn" mat-flat-button color="primary" (click) = "connectTheMarks()">Показать</button>
       </div>

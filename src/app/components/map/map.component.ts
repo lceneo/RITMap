@@ -21,6 +21,10 @@ export class MapComponent implements OnInit{
     this.map = this.mapService.initialiseMap();
   }
 
+  public saveNewPoint(){
+    this.mapService.saveNewPoint(this.map);
+  }
+
   public clearAllMarksAndTracks(): void{
     this.mapService.removeAllMarksAndTracks(this.map);
   }

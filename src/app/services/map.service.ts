@@ -1,13 +1,10 @@
 import { Injectable } from '@angular/core';
-import {Point} from 'ol/geom.js';
 import View from 'ol/View.js';
 import TileLayer from 'ol/layer/Tile.js';
 import OSM from 'ol/source/OSM.js';
 import {fromEvent} from "rxjs";
-import {Feature, MapBrowserEvent} from "ol";
-import {fromLonLat, toLonLat} from "ol/proj";
-import LayerVector from 'ol/layer/Vector';
-import SourceVector from 'ol/source/Vector';
+import {MapBrowserEvent} from "ol";
+import {toLonLat} from "ol/proj";
 import {MapWithPoints} from "../data-entities/MapWithPoints";
 import {CustomPoint} from "../data-entities/CustomPoint";
 import {CoordinateService} from "./coordinate.service";
@@ -45,9 +42,17 @@ export class MapService {
     fromEvent<MapBrowserEvent<any>>(map, "click")
       .subscribe(v => {
         let [lon, lat] = toLonLat(v.coordinate);
+        let points = map.getPoints();
+        if(points.length > 0 && !points[points.length - 1].isSaved){
+          map.removeLastPointAndMarker();
+        }
         map.addPoint(new CustomPoint(lon, lat), this.coordinateService.getAdress(lon, lat));
         localStorage.setItem("points", JSON.stringify(map.getPoints()));
       });
+  }
+
+  public saveNewPoint(map: MapWithPoints): void{
+    map.saveLastPoint();
   }
 
   public removeAllMarksAndTracks(map: MapWithPoints): void{
@@ -57,7 +62,6 @@ export class MapService {
   }
 
   public getMarksConnected(map: MapWithPoints): void{
-    map.connectPoints();
-    localStorage.setItem("trackProvided?", JSON.stringify(map.getPoints().length));
+    localStorage.setItem("trackProvided?", JSON.stringify(map.connectPoints()));
   }
 }
