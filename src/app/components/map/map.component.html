@@ -1,17 +1,20 @@
 
-  <h1 class="title">Карта</h1>
-  <div id="ol-map"></div>
-  <div class="buttons">
-    <button>Сохранить</button>
-    <button (click)="clearAllMarks()">Очистить</button>
-    <button>Показать</button>
+  <div class="wrapper">
+    <section class = mapInfo>
+      <div id="ol-map"></div>
+      <div class="buttons">
+        <button class="mapBtn" mat-flat-button color="primary">Сохранить</button>
+        <button class="mapBtn" mat-flat-button color="primary" (click)="clearAllMarksAndTracks()">Очистить</button>
+        <button class="mapBtn" mat-flat-button color="primary" (click) = "connectTheMarks()">Показать</button>
+      </div>
+    </section>
+    <section class="markers">
+      <h2 class="markers__title">Список сохранённых точек</h2>
+      <mat-list>
+        <mat-list-item *ngFor="let p of map.getPoints()">
+          <span matListItemTitle>{{p.adress}}</span>
+          <span matListItemLine>Долгота: {{p.longitude}} Широта: {{p.latitude}}</span>
+        </mat-list-item>
+        </mat-list>
+    </section>
   </div>
-  <section>
-    Список сохранённых точек:
-  </section>
-  <mat-list>
-    <mat-list-item *ngFor="let p of map.getPoints()">
-      <span matListItemTitle>{{p.adress}}</span>
-      <span matListItemLine>Долгота: {{p.longitude}} Широта: {{p.latitude}}</span>
-    </mat-list-item>
-  </mat-list>

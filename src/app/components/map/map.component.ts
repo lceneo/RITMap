@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import {MapService} from "../../services/map.service";
 import {MapWithPoints} from "../../data-entities/MapWithPoints";
 
@@ -12,11 +12,20 @@ export class MapComponent implements OnInit{
 
   constructor(private mapService: MapService) {}
 
+  @HostListener("window:beforeunload")
+  updatePointsStorage(){
+    localStorage.setItem("points", JSON.stringify(this.map.getPoints()));
+  }
+
   ngOnInit(): void {
     this.map = this.mapService.initialiseMap();
   }
 
-  public clearAllMarks(): void{
-    this.mapService.removeAllMarks(this.map);
+  public clearAllMarksAndTracks(): void{
+    this.mapService.removeAllMarksAndTracks(this.map);
+  }
+
+  public connectTheMarks(): void{
+    this.mapService.getMarksConnected(this.map);
   }
 }

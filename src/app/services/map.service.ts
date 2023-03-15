@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
-import Map from 'ol/Map.js';
 import {Point} from 'ol/geom.js';
 import View from 'ol/View.js';
 import TileLayer from 'ol/layer/Tile.js';
 import OSM from 'ol/source/OSM.js';
-import {debounce, fromEvent} from "rxjs";
+import {fromEvent} from "rxjs";
 import {Feature, MapBrowserEvent} from "ol";
 import {fromLonLat, toLonLat} from "ol/proj";
 import LayerVector from 'ol/layer/Vector';
@@ -32,6 +31,12 @@ export class MapService {
             })],
         target: 'ol-map'
       });
+      const previousPointsJSON = localStorage.getItem("points");
+      const previousTrackJSON = localStorage.getItem("trackProvided?");
+      if(previousPointsJSON !== null)
+        JSON.parse(previousPointsJSON).forEach((p: CustomPoint) => map.addPoint(p));
+      if(previousTrackJSON !== null)
+        map.connectPoints(JSON.parse(previousTrackJSON));
       this.initialiseMarkerCreation(map);
       return map;
   }
@@ -40,19 +45,19 @@ export class MapService {
     fromEvent<MapBrowserEvent<any>>(map, "click")
       .subscribe(v => {
         let [lon, lat] = toLonLat(v.coordinate);
-        const newMarker = new Feature({
-          geometry: new Point(fromLonLat([lon, lat]))
-        });
-        map.addLayer(new LayerVector({source: new SourceVector(
-            {features: [newMarker]})
-        }));
         map.addPoint(new CustomPoint(lon, lat), this.coordinateService.getAdress(lon, lat));
         localStorage.setItem("points", JSON.stringify(map.getPoints()));
       });
   }
 
-  public removeAllMarks(map: MapWithPoints): void{
+  public removeAllMarksAndTracks(map: MapWithPoints): void{
     localStorage.removeItem("points");
-    map.deleteAllPoints();
+    localStorage.removeItem("trackProvided?");
+    map.deleteAllPointsAndTracks();
+  }
+
+  public getMarksConnected(map: MapWithPoints): void{
+    map.connectPoints();
+    localStorage.setItem("trackProvided?", JSON.stringify(map.getPoints().length));
   }
 }

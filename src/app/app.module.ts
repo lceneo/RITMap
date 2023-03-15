@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { MapComponent } from './components/map/map.component';
 import {MatListModule} from "@angular/material/list";
 import {HttpClientModule} from "@angular/common/http";
+import {MatButtonModule} from "@angular/material/button";
 
 @NgModule({
   declarations: [
@@ -15,8 +16,9 @@ import {HttpClientModule} from "@angular/common/http";
   imports: [
     BrowserModule,
     AppRoutingModule,
+    HttpClientModule,
     MatListModule,
-    HttpClientModule
+    MatButtonModule
   ],
   providers: [],
   bootstrap: [AppComponent]
