@@ -1,4 +1,4 @@
-import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
+import {Component, HostListener, Input, OnDestroy, OnInit} from '@angular/core';
 import {MapService} from "../../services/map.service";
 import {MapWithPoints} from "../../data-entities/MapWithPoints";
 
@@ -8,6 +8,7 @@ import {MapWithPoints} from "../../data-entities/MapWithPoints";
   styleUrls: ['./map.component.scss']
 })
 export class MapComponent implements OnInit, OnDestroy{
+
   protected map!: MapWithPoints;
 
   constructor(private mapService: MapService) {}

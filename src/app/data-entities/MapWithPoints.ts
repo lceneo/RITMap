@@ -1,6 +1,6 @@
 import Map, { MapOptions } from "ol/Map.js";
 import {CustomPoint} from "./CustomPoint";
-import {interval, Observable, take} from "rxjs";
+import {interval, Observable, Subscription, take} from "rxjs";
 import LayerVector from "ol/layer/Vector";
 import SourceVector from "ol/source/Vector";
 import {Feature} from "ol";
@@ -14,6 +14,7 @@ export class MapWithPoints extends Map {
   private markersLayer!: LayerVector<SourceVector<any>>;
   private tracksLayer!: LayerVector<SourceVector<any>>;
   private lastAddedFeature!: Feature<Point>;
+  private trackSubscription!: Subscription;
 
   constructor(options: MapOptions | undefined, private markerImgURL?: string) {
     super(options);
@@ -42,7 +43,7 @@ export class MapWithPoints extends Map {
     this.lastAddedFeature = newMarker;
     newMarker.setStyle(new Style({
       image: new Icon({
-        src: this.markerImgURL, scale: 0.03, color: point.isSaved ? "#ff0000" : "#413c3c"})
+        src: this.markerImgURL, scale: 0.03, color: point.isSaved ? undefined : "#413c3c"})
     }));
     this.markersLayer.getSource()!.addFeature(newMarker);
     this.points.push(point);
@@ -55,7 +56,7 @@ export class MapWithPoints extends Map {
     this.points[this.points.length - 1].isSaved = true;
     this.lastAddedFeature.setStyle(new Style({
       image: new Icon({
-        src: this.markerImgURL, scale: 0.03, color: "#ff0000"})
+        src: this.markerImgURL, scale: 0.03})
     }));
   }
 
@@ -66,6 +67,7 @@ export class MapWithPoints extends Map {
   public deleteAllPointsAndTracks(): void {
     if (this.points.length === 0)
       return;
+    this.trackSubscription.unsubscribe();
     this.markersLayer.getSource()!.clear();
     this.tracksLayer.getSource()!.clear();
     this.points = [];
@@ -77,6 +79,8 @@ export class MapWithPoints extends Map {
   }
 
   public connectPoints(pointsNumber: number = this.points.length): number{
+    if(this.trackSubscription !== undefined)
+      this.trackSubscription.unsubscribe();
     this.tracksLayer.getSource()!.clear();
     const featuresToAdd: Feature[] = [];
     let returnValue = 0;
@@ -94,7 +98,7 @@ export class MapWithPoints extends Map {
       featuresToAdd.push(feature);
       isSuccessful = true;
     }
-    interval(1500)
+    this.trackSubscription = interval(1500)
       .pipe(take(featuresToAdd.length))
       .subscribe(i => this.tracksLayer.getSource()!.addFeature(featuresToAdd[i]));
     return isSuccessful ? this.points.length : returnValue;

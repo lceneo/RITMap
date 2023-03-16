@@ -1,5 +1,17 @@
 header{
-  height: 100px;
+  height: 70px;
+  padding-top: 30px;
   background-color: cornflowerblue;
 }
 
+button[mat-icon-button]{
+  position: absolute;
+  right: 1100px;
+  top: 100px;
+}
+
+.title{
+  font-size: 28px;
+  color: ghostwhite;
+  text-align: center;
+}
