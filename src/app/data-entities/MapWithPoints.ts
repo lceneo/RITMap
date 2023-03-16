@@ -67,7 +67,8 @@ export class MapWithPoints extends Map {
   public deleteAllPointsAndTracks(): void {
     if (this.points.length === 0)
       return;
-    this.trackSubscription.unsubscribe();
+    if(this.trackSubscription !== undefined)
+      this.trackSubscription.unsubscribe();
     this.markersLayer.getSource()!.clear();
     this.tracksLayer.getSource()!.clear();
     this.points = [];
