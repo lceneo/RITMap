@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {map, Observable} from "rxjs";
+import {map, Observable, take} from "rxjs";
 import {IRequest} from "../models/IRequest";
 
 @Injectable({
@@ -16,6 +16,7 @@ export class CoordinateService {
     return this.httpClient.get<IRequest>(
       `https://api.opencagedata.com/geocode/v1/json?key=${this.APIKEY}&q=${lat}+${lon}&pretty=1&address_only=1&language=ru`)
       .pipe(
+        take(1),
         map(v => v.results[0].formatted)
       );
   };

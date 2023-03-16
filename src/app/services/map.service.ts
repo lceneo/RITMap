@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import View from 'ol/View.js';
 import TileLayer from 'ol/layer/Tile.js';
 import OSM from 'ol/source/OSM.js';
-import {fromEvent} from "rxjs";
+import {fromEvent, Subscription} from "rxjs";
 import {MapBrowserEvent} from "ol";
 import {toLonLat} from "ol/proj";
 import {MapWithPoints} from "../data-entities/MapWithPoints";
@@ -13,6 +13,8 @@ import {CoordinateService} from "./coordinate.service";
   providedIn: 'root'
 })
 export class MapService {
+
+  public clickSubscription!: Subscription;
 
   constructor(private coordinateService: CoordinateService) { }
 
@@ -27,7 +29,7 @@ export class MapService {
               source: new OSM()
             })],
         target: 'ol-map'
-      });
+      }, "../../assets/img/marker.svg");
       const previousPointsJSON = localStorage.getItem("points");
       const previousTrackJSON = localStorage.getItem("trackProvided?");
       if(previousPointsJSON !== null)
@@ -39,7 +41,7 @@ export class MapService {
   }
 
   private initialiseMarkerCreation(map: MapWithPoints): void{
-    fromEvent<MapBrowserEvent<any>>(map, "click")
+    this.clickSubscription = fromEvent<MapBrowserEvent<any>>(map, "click")
       .subscribe(v => {
         let [lon, lat] = toLonLat(v.coordinate);
         let points = map.getPoints();

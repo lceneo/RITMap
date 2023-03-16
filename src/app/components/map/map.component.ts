@@ -1,4 +1,4 @@
-import {Component, HostListener, OnInit} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
 import {MapService} from "../../services/map.service";
 import {MapWithPoints} from "../../data-entities/MapWithPoints";
 
@@ -7,18 +7,22 @@ import {MapWithPoints} from "../../data-entities/MapWithPoints";
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss']
 })
-export class MapComponent implements OnInit{
+export class MapComponent implements OnInit, OnDestroy{
   protected map!: MapWithPoints;
 
   constructor(private mapService: MapService) {}
 
+  ngOnInit(): void {
+    this.map = this.mapService.initialiseMap();
+  }
+
+  ngOnDestroy(): void {
+    this.mapService.clickSubscription.unsubscribe();
+  }
+
   @HostListener("window:beforeunload")
   updatePointsStorage(){
     localStorage.setItem("points", JSON.stringify(this.map.getPoints()));
-  }
-
-  ngOnInit(): void {
-    this.map = this.mapService.initialiseMap();
   }
 
   public saveNewPoint(){
@@ -32,4 +36,5 @@ export class MapComponent implements OnInit{
   public connectTheMarks(): void{
     this.mapService.getMarksConnected(this.map);
   }
+
 }

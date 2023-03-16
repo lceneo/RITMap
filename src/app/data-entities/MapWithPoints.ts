@@ -1,6 +1,6 @@
 import Map, { MapOptions } from "ol/Map.js";
 import {CustomPoint} from "./CustomPoint";
-import {Observable} from "rxjs";
+import {interval, Observable, take} from "rxjs";
 import LayerVector from "ol/layer/Vector";
 import SourceVector from "ol/source/Vector";
 import {Feature} from "ol";
@@ -12,9 +12,10 @@ import Icon from "ol/style/Icon";
 export class MapWithPoints extends Map {
   private points: CustomPoint[] = [];
   private markersLayer!: LayerVector<SourceVector<any>>;
+  private tracksLayer!: LayerVector<SourceVector<any>>;
   private lastAddedFeature!: Feature<Point>;
 
-  constructor(options: MapOptions | undefined) {
+  constructor(options: MapOptions | undefined, private markerImgURL?: string) {
     super(options);
     this.markersLayer = new LayerVector(
       {
@@ -23,7 +24,15 @@ export class MapWithPoints extends Map {
             features: []
           })
       });
+    this.tracksLayer = new LayerVector(
+      {
+        source: new SourceVector(
+          {
+            features: []
+          })
+      });
     this.addLayer(this.markersLayer);
+    this.addLayer(this.tracksLayer);
   }
 
   public addPoint(point: CustomPoint, adressObservable?: Observable<string>): void {
@@ -33,7 +42,7 @@ export class MapWithPoints extends Map {
     this.lastAddedFeature = newMarker;
     newMarker.setStyle(new Style({
       image: new Icon({
-        src: point.isSaved? "../../assets/img/saved-marker.svg" : "../../assets/img/unsaved-marker.svg", scale: 0.03})
+        src: this.markerImgURL, scale: 0.03, color: point.isSaved ? "#ff0000" : "#413c3c"})
     }));
     this.markersLayer.getSource()!.addFeature(newMarker);
     this.points.push(point);
@@ -46,7 +55,7 @@ export class MapWithPoints extends Map {
     this.points[this.points.length - 1].isSaved = true;
     this.lastAddedFeature.setStyle(new Style({
       image: new Icon({
-        src: "../../assets/img/saved-marker.svg", scale: 0.03})
+        src: this.markerImgURL, scale: 0.03, color: "#ff0000"})
     }));
   }
 
@@ -58,6 +67,7 @@ export class MapWithPoints extends Map {
     if (this.points.length === 0)
       return;
     this.markersLayer.getSource()!.clear();
+    this.tracksLayer.getSource()!.clear();
     this.points = [];
   }
 
@@ -67,18 +77,26 @@ export class MapWithPoints extends Map {
   }
 
   public connectPoints(pointsNumber: number = this.points.length): number{
+    this.tracksLayer.getSource()!.clear();
+    const featuresToAdd: Feature[] = [];
+    let returnValue = 0;
     let isSuccessful = false;
     for (let i = 0; i < pointsNumber - 1; i++) {
-      if(!this.points[i].isSaved || !this.points[i + 1].isSaved)
-        return i + 1;
+      if(!this.points[i].isSaved || !this.points[i + 1].isSaved) {
+        returnValue = i + 1;
+        break;
+      }
       const fPointLocation = fromLonLat([this.points[i].longitude, this.points[i].latitude]);
       const sPointLocation = fromLonLat([this.points[i+1].longitude, this.points[i+1].latitude]);
       const feature = new Feature({
         geometry: new LineString([fPointLocation, sPointLocation])
       });
-      this.markersLayer.getSource()!.addFeature(feature);
+      featuresToAdd.push(feature);
       isSuccessful = true;
     }
-    return isSuccessful ? this.points.length : 0;
+    interval(1500)
+      .pipe(take(featuresToAdd.length))
+      .subscribe(i => this.tracksLayer.getSource()!.addFeature(featuresToAdd[i]));
+    return isSuccessful ? this.points.length : returnValue;
   }
 }
